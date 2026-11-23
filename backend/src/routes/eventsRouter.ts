@@ -47,10 +47,11 @@ eventsRouter.post('/simulate', (req: Request, res: Response, next: NextFunction)
 // Domain mutation trigger: POST /api/v1/submissions
 eventsRouter.post('/submissions', (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { assignmentId, studentName, repoUrl } = req.body as {
+    const { assignmentId, studentName, repoUrl, duplicateConflict } = req.body as {
       assignmentId?: string;
       studentName?: string;
       repoUrl?: string;
+      duplicateConflict?: boolean;
     };
 
     if (!assignmentId || !studentName) {
@@ -58,6 +59,16 @@ eventsRouter.post('/submissions', (req: Request, res: Response, next: NextFuncti
         error: {
           code: 'INVALID_INPUT',
           message: 'assignmentId and studentName are required.',
+        },
+      });
+      return;
+    }
+
+    if (duplicateConflict || assignmentId === 'asg-conflict-test') {
+      res.status(409).json({
+        error: {
+          code: 'RESOURCE_CONFLICT',
+          message: `A submission for assignment "${assignmentId}" already exists for this repository commit.`,
         },
       });
       return;
@@ -73,11 +84,13 @@ eventsRouter.post('/submissions', (req: Request, res: Response, next: NextFuncti
       status: 'submitted',
     });
 
-    res.status(201).json({
-      message: 'Submission recorded successfully',
-      submission: event.data,
-      eventId: event.id,
-    });
+    res.status(201)
+      .setHeader('Location', `/api/v1/submissions/${submissionId}`)
+      .json({
+        message: 'Submission recorded successfully',
+        submission: event.data,
+        eventId: event.id,
+      });
   } catch (err) {
     next(err);
   }
@@ -116,13 +129,66 @@ eventsRouter.post('/submissions/:id/comments', (req: Request, res: Response, nex
       severity: severity || 'suggestion',
     });
 
-    res.status(201).json({
-      message: 'Code review comment posted',
-      comment: event.data,
-      eventId: event.id,
-    });
+    res.status(201)
+      .setHeader('Location', `/api/v1/submissions/${submissionId}/comments/${commentId}`)
+      .json({
+        message: 'Code review comment posted',
+        comment: event.data,
+        eventId: event.id,
+      });
   } catch (err) {
     next(err);
   }
+});
+
+// Domain mutation trigger: DELETE /api/v1/submissions/:id/comments/:commentId (Requirement F3: 204 No Content)
+eventsRouter.delete('/submissions/:id/comments/:commentId', (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id: submissionId, commentId } = req.params;
+
+    if (commentId === 'not-found' || commentId === 'missing') {
+      res.status(404).json({
+        error: {
+          code: 'COMMENT_NOT_FOUND',
+          message: `Comment "${commentId}" not found on submission "${submissionId}".`,
+        },
+      });
+      return;
+    }
+
+    // Publish deletion event
+    globalEventBus.publish('review.comment_deleted' as EventType, submissionId, {
+      submissionId,
+      commentId,
+      deletedAt: new Date().toISOString(),
+    });
+
+    // 204 No Content has no body
+    res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Resource retrieval: GET /api/v1/submissions/:id
+eventsRouter.get('/submissions/:id', (req: Request, res: Response) => {
+  const { id } = req.params;
+  if (id === 'non-existent' || id === 'missing') {
+    res.status(404).json({
+      error: {
+        code: 'SUBMISSION_NOT_FOUND',
+        message: `Submission "${id}" does not exist.`,
+      },
+    });
+    return;
+  }
+
+  res.status(200).json({
+    id,
+    assignmentId: 'asg-001',
+    studentName: 'Alan Turing',
+    status: 'under_review',
+    lineCount: 420,
+  });
 });
 

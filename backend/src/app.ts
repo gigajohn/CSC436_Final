@@ -6,6 +6,10 @@ import { mcpRouter } from './routes/mcpRouter.js';
 import { authRouter } from './routes/authRouter.js';
 import { instructorRouter } from './routes/instructorRouter.js';
 import { analysisRouter } from './routes/analysisRouter.js';
+import { observabilityRouter } from './routes/observabilityRouter.js';
+import { tracingMiddleware } from './observability/tracer.js';
+import { metricsMiddleware } from './observability/metrics.js';
+import { checkDatabaseHealth } from './db/connection.js';
 
 export interface ApiErrorResponse {
   error: {
@@ -33,6 +37,10 @@ export class AppError extends Error {
 export function createApp() {
   const app = express();
 
+  // Observability & Tracing (Requirement D10)
+  app.use(tracingMiddleware);
+  app.use(metricsMiddleware);
+
   // Security and parsing middleware
   app.use(helmet());
   app.use(
@@ -43,13 +51,20 @@ export function createApp() {
   );
   app.use(express.json());
 
-  // Health check endpoint (Requirement baseline & D4 gate)
-  app.get('/healthz', (_req: Request, res: Response) => {
-    res.status(200).json({
-      status: 'ok',
+  // Health check endpoint (Requirement baseline, F4, & D4 gate)
+  app.get('/healthz', async (_req: Request, res: Response) => {
+    const dbHealth = await checkDatabaseHealth();
+    const isHealthy = dbHealth.status === 'connected';
+
+    res.status(isHealthy ? 200 : 503).json({
+      status: isHealthy ? 'ok' : 'degraded',
       service: 'studysync-backend',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
+      database: {
+        status: dbHealth.status,
+        latencyMs: dbHealth.latencyMs,
+      },
     });
   });
 
@@ -120,6 +135,9 @@ export function createApp() {
 
   // Mount Third-Party Code Analysis Routes (Requirement F10)
   app.use('/api/v1/analysis', analysisRouter);
+
+  // Mount Observability & Metrics Routes (Requirement D10)
+  app.use('/', observabilityRouter);
 
   // 404 handler for unmatched routes
   app.use((_req: Request, _res: Response, next: NextFunction) => {

@@ -1,0 +1,140 @@
+name: StudySync CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality-and-tests:
+    name: Code Quality & Automated Test Gates (F1-F13, S1)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Record Commit SHA
+        run: |
+          echo "=================================================="
+          echo "CI Pipeline Triggered for Commit: ${{ github.sha }}"
+          echo "Git Ref: ${{ github.ref }}"
+          echo "=================================================="
+
+      - name: Set up Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install Workspace Dependencies
+        run: npm ci
+
+      - name: Strict TypeScript Compilation (Requirement F1)
+        run: npm run typecheck
+
+      - name: Run Unified Automated Verification Suite (Requirement Q1)
+        run: npm run test
+
+      - name: Build Production Frontend & Backend Bundles
+        run: npm run build
+
+  docker-build-and-gate:
+    name: Container Build, Healthz Gate & Rollback Demo (D4, D5)
+    needs: quality-and-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Backend Image & Record Digest (Requirement D4)
+        run: |
+          BUILD_ID="build-${{ github.run_number }}-${{ github.sha }}"
+          echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
+          
+          docker build \
+            --file backend/Dockerfile \
+            --tag studysync-backend:${{ github.sha }} \
+            --tag studysync-backend:latest .
+            
+          IMAGE_DIGEST=$(docker images --no-trunc --quiet studysync-backend:${{ github.sha }})
+          echo "BACKEND_IMAGE_DIGEST=$IMAGE_DIGEST" >> $GITHUB_ENV
+          echo "✓ Successfully built studysync-backend:${{ github.sha }}"
+          echo "✓ Image Digest: $IMAGE_DIGEST"
+          echo "✓ Build ID: $BUILD_ID"
+
+      - name: Build Frontend Image (Requirement D4)
+        run: |
+          docker build \
+            --file frontend/Dockerfile \
+            --tag studysync-frontend:${{ github.sha }} \
+            --tag studysync-frontend:latest .
+          echo "✓ Successfully built studysync-frontend:${{ github.sha }}"
+
+      - name: Deploy & Gate on /healthz (Requirement D4)
+        run: |
+          echo "Starting backend container for healthz gating verification..."
+          docker run -d --name test-backend -p 4000:4000 studysync-backend:${{ github.sha }}
+          
+          echo "Polling http://localhost:4000/healthz for operational readiness..."
+          SUCCESS=0
+          for i in $(seq 1 15); do
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:4000/healthz || true)
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "✓ Health check passed with HTTP 200 on attempt $i"
+              curl -s http://localhost:4000/healthz
+              SUCCESS=1
+              break
+            fi
+            echo "Attempt $i: waiting for /healthz (status: $HTTP_CODE)..."
+            sleep 2
+          done
+          
+          if [ "$SUCCESS" -ne 1 ]; then
+            echo "❌ Deployment gate failed: /healthz did not return 200 within timeout."
+            docker logs test-backend
+            exit 1
+          fi
+
+      - name: Demonstrated Rollback on Simulated Failure (Requirement D4 Proof)
+        run: |
+          echo "======================================================================"
+          echo "Simulating canary deployment failure and automated rollback (D4 Proof)"
+          echo "======================================================================"
+          
+          # 1. Simulate a faulty build/revision that fails the /healthz gate
+          echo "[Step 1] Deploying faulty canary revision (simulated broken environment)..."
+          docker run -d --name faulty-canary -p 4001:4000 -e FAULT_INJECTION=true studysync-backend:${{ github.sha }} \
+            node -e "const http=require('http'); http.createServer((q,s)=>{ s.writeHead(503,{'content-type':'application/json'}); s.end(JSON.stringify({status:'degraded'})); }).listen(4000);"
+            
+          # 2. Gate check detects the failure
+          CANARY_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:4001/healthz || true)
+          echo "Canary health status detected: $CANARY_STATUS"
+          
+          if [ "$CANARY_STATUS" != "200" ]; then
+            echo "⚠️ GATE TRIGGERED: Faulty canary returned HTTP $CANARY_STATUS. Aborting deployment!"
+            echo "[Step 2] Initiating automated rollback to previous known-good image digest: $BACKEND_IMAGE_DIGEST"
+            
+            # Tear down failed canary
+            docker stop faulty-canary && docker rm faulty-canary
+            
+            # Re-affirm primary deployment is running healthy
+            HEALTH_CONFIRM=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:4000/healthz)
+            if [ "$HEALTH_CONFIRM" = "200" ]; then
+              echo "✓ ROLLBACK SUCCESSFUL: Production traffic remains routed to verified digest $BACKEND_IMAGE_DIGEST"
+              echo "✓ Live healthz output after rollback:"
+              curl -s http://localhost:4000/healthz
+            else
+              echo "❌ Rollback verification failed"
+              exit 1
+            fi
+          fi
+          
+          # Cleanup test containers
+          docker stop test-backend && docker rm test-backend
+

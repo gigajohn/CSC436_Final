@@ -4,6 +4,8 @@ import { writeRateLimiter } from '../middleware/rateLimiter.js';
 
 export const instructorRouter = Router();
 
+const lockedAssignments = new Set<string>();
+
 // Apply rate limiter and authentication to instructor routes
 instructorRouter.use(writeRateLimiter);
 instructorRouter.use(authenticateToken);
@@ -56,9 +58,22 @@ instructorRouter.post('/:id/grade', requireRole(['instructor', 'admin']), (req: 
 });
 
 // Requirement F9 Proof: Instructor-only assignment locking route
+// Requirement F3 Proof: 409 Conflict if already locked
 instructorRouter.post('/:id/lock', requireRole(['instructor', 'admin']), (req: Request, res: Response, next: NextFunction) => {
   try {
     const assignmentId = req.params.id;
+
+    if (lockedAssignments.has(assignmentId)) {
+      res.status(409).json({
+        error: {
+          code: 'ASSIGNMENT_ALREADY_LOCKED',
+          message: `Assignment "${assignmentId}" is already locked and cannot be locked again.`,
+        },
+      });
+      return;
+    }
+
+    lockedAssignments.add(assignmentId);
 
     recordAuditAction(
       req,
@@ -77,5 +92,12 @@ instructorRouter.post('/:id/lock', requireRole(['instructor', 'admin']), (req: R
   } catch (err) {
     next(err);
   }
+});
+
+// Unlock helper to reset locking state for tests
+instructorRouter.post('/:id/unlock', requireRole(['instructor', 'admin']), (req: Request, res: Response) => {
+  const assignmentId = req.params.id;
+  lockedAssignments.delete(assignmentId);
+  res.status(200).json({ status: 'unlocked', assignmentId });
 });
 

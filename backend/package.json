@@ -11,19 +11,26 @@
     "test:sse": "tsx src/scripts/verify-sse.ts",
     "test:mcp": "tsx src/scripts/verify-mcp.ts",
     "test:auth": "tsx src/scripts/verify-auth-rbac-ratelimit.ts",
-    "test:thirdparty": "tsx src/scripts/verify-f10-thirdparty.ts"
+    "test:thirdparty": "tsx src/scripts/verify-f10-thirdparty.ts",
+    "test:storage": "tsx src/scripts/verify-f4-f5-storage.ts",
+    "test:rest": "tsx src/scripts/verify-f3-rest.ts",
+    "test:observability": "tsx src/scripts/verify-d10-observability.ts",
+    "generate:transcript": "tsx src/scripts/generate-curl-transcript.ts"
   },
   "dependencies": {
+    "@electric-sql/pglite": "^0.6.0",
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "helmet": "^8.0.0",
     "jose": "^6.2.18",
+    "pg": "^8.23.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/node": "^22.10.1",
+    "@types/pg": "^8.23.1",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3"
   }

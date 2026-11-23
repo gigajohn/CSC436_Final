@@ -10,7 +10,7 @@
     "dev:backend": "npm --workspace=backend run dev",
     "dev:frontend": "npm --workspace=frontend run dev",
     "typecheck": "npm --workspace=backend run typecheck && npm --workspace=frontend run typecheck",
-    "test": "npm --workspace=backend run test:auth && npm --workspace=backend run test:thirdparty && npm --workspace=backend run test:mcp && npm --workspace=backend run test:sse",
+    "test": "npm --workspace=backend run test:storage && npm --workspace=backend run test:auth && npm --workspace=backend run test:thirdparty && npm --workspace=backend run test:mcp && npm --workspace=backend run test:sse && npm --workspace=backend run test:rest && npm --workspace=backend run test:observability",
     "build": "npm --workspace=backend run build && npm --workspace=frontend run build"
   }
 }
