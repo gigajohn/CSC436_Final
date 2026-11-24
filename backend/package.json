@@ -16,6 +16,7 @@
     "test:rest": "tsx src/scripts/verify-f3-rest.ts",
     "test:observability": "tsx src/scripts/verify-d10-observability.ts",
     "test:calculation": "tsx src/scripts/verify-q1-calculation.ts",
+    "demo:defense": "tsx src/scripts/oral-defense-demo.ts",
     "generate:transcript": "tsx src/scripts/generate-curl-transcript.ts"
   },
   "dependencies": {
