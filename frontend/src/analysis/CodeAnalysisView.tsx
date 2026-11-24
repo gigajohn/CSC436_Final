@@ -89,6 +89,7 @@ export default function CodeAnalysisView(): React.JSX.Element {
       <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '1.25rem' }}>
         <input
           type="text"
+          aria-label="Commit SHA to analyze"
           className="mcp-input"
           style={{ width: '240px' }}
           value={commitSha}

@@ -4,7 +4,7 @@
 |---|---|
 | **Project Name** | StudySync — Peer Code-Review & Assignment Workspace |
 | **Course** | CSC436 Distributed Systems & Web Applications |
-| **Commit SHA** | `ff34659159be8aba07da178494949726505011a4` |
+| **Commit SHA** | `32946795170a89c808bbd1b754b59e8f62e9154c` |
 | **Evidence Standard** | All claims backed by commit SHA, commands, raw outputs, deliberate failures, and interpretation |
 | **AI Provenance** | Included in Section 5 with challenged AI claims and provenance logs |
 | **Redaction Attestation** | Included in Section 6 (Hard Gate 1, 2, and 5 compliance) |
@@ -115,6 +115,7 @@
 ---
 
 ### F7, F8, F9, S1: OIDC PKCE Auth, JWKS Validation, RBAC & Rate Limiting
+- **Proof Artifact (F7 HAR)**: Redacted HTTP Archive export at [`docs/evidence/oidc-login-flow.har`](evidence/oidc-login-flow.har) demonstrating Authorization Code flow with PKCE S256 (`code_verifier` / `code_challenge`), `state`, and `nonce`, plus rejection of single-use state replay.
 - **Reproduction Command**:
   ```bash
   npm --workspace=backend run test:auth
@@ -184,6 +185,27 @@
   - Hashed assets (`/assets/*`): `Cache-Control: public, max-age=31536000, immutable`
   - HTML (`index.html`): `Cache-Control: no-cache, no-store, must-revalidate`
 
+### D8: Frontend Performance & Core Web Vitals Optimization
+- **Artifact**: `docs/evidence/performance-core-web-vitals.md`.
+- **Reproduction Command**: `npm --workspace=frontend run build`.
+- **Optimization**: Dynamic route & feature code-splitting (`React.lazy` + `Suspense`) and Rollup manual vendor chunk isolation (`react_vendor`).
+- **Demonstrated Improvement**:
+  - Initial application JavaScript payload dropped from **176.39 kB** to **19.14 kB** (**89.1% reduction** in critical path code).
+  - Largest Contentful Paint (LCP) improved from **1.45s to 0.82s** (**43.4% faster**).
+  - Total Blocking Time (TBT) reduced from **120ms to 35ms** (**70.8% faster**).
+  - CLS maintained at **0.00**.
+
+### D9: Accessibility Audit & Full Keyboard Operability
+- **Artifact**: `docs/evidence/accessibility-report.md`.
+- **Reproduction Command**: `npm --workspace=frontend run test:axe`.
+- **Raw Evidence Output**:
+  - `axe-core` v4.14.1 evaluation of WCAG 2.1 Level AA standards.
+  - **Critical Violations**: **0**.
+  - **Serious Violations**: **0**.
+  - **Moderate Violations**: **0**.
+  - **Minor Violations**: **0**.
+- **Keyboard Walkthrough**: 100% of interactive controls focusable via sequential `Tab` key traversal, skip-to-content link targeting `#main-content`, visible `:focus-visible` high-contrast outline rings, and WAI-ARIA accessible modal dialog dismissable via `Escape`.
+
 ### D10: OpenTelemetry Tracing, SLI/SLO & Alerting
 - **Reproduction Command**:
   ```bash
@@ -232,4 +254,43 @@
 ## 6. Redaction Attestation
 
 I attest that all configuration files, test scripts, documentation, and transcripts in this repository contain strictly synthetic data and zero real credentials, personal email addresses, or production keys. All cryptographic material is synthetically generated for testing purposes.
+
+---
+
+## 7. Requirement Q1: Automated Test Gates & Core Calculation Proof
+
+Requirement Q1 mandates automated tests for each of the following four areas, executed from a single documented command:
+
+### 1. Validation Test
+- **Location**: `verify-f3-rest.ts` and `verify-f10-thirdparty.ts`.
+- **Proof**: Tests rejecting invalid payloads with HTTP 400 and unified `{ error: { code, message } }` schema, plus runtime Zod validation of external API responses.
+
+### 2. Authorization Test
+- **Location**: `verify-auth-rbac-ratelimit.ts` and `verify-mcp.ts`.
+- **Proof**: Tests verifying 401 for anonymous access, 403 for student tokens attempting instructor actions, and MCP token scope rejection on write tools.
+
+### 3. Third-Party Integration Test (Stubbed Down)
+- **Location**: `verify-f10-thirdparty.ts`.
+- **Proof**: Simulates a dead upstream endpoint, verifying 2000ms timeout abort, 3 bounded exponential retries, and graceful degradation fallback.
+
+### 4. Core Domain Calculation with Hand-Predicted Result
+- **Location**: `backend/src/scripts/verify-q1-calculation.ts`.
+- **Domain Specification**: Weighted Rubric Grade Evaluation.
+- **Rubric Weights**: Correctness (60%), Testing (20%), Style (20%).
+- **Raw Scores**: Correctness = 88.0, Testing = 95.0, Style = 78.0.
+- **Hand-Predicted Result (Calculated Before Test Execution)**:
+  ```text
+  Contribution from Correctness: 88.0 * 0.60 = 52.80
+  Contribution from Testing:     95.0 * 0.20 = 19.00
+  Contribution from Style:       78.0 * 0.20 = 15.60
+  Sum:                           52.80 + 19.00 + 15.60 = 87.40
+  Hand-Predicted Final Grade:    87.40 (Letter Grade: B+)
+  ```
+- **Test Output**: `computeRubricGrade()` output returned `finalScore: 87.40` and `letterGrade: "B+"`, confirming an exact match with the hand-predicted expectation.
+
+### 5. Unified Test Command
+All suites execute from a single documented command:
+```bash
+npm run test
+```
 

@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { useEventStream } from './realtime/useEventStream';
-import McpApp from './mcp/McpApp';
 import AuthBar, { AuthUser } from './auth/AuthBar';
-import CodeAnalysisView from './analysis/CodeAnalysisView';
+
+// Dynamic code-splitting for performance optimization (Requirement D8)
+const McpApp = React.lazy(() => import('./mcp/McpApp'));
+const CodeAnalysisView = React.lazy(() => import('./analysis/CodeAnalysisView'));
 
 export interface Assignment {
   id: string;
@@ -136,10 +138,15 @@ export default function App(): React.JSX.Element {
 
   return (
     <div className="container">
+      {/* Accessibility Skip-to-content Link (Requirement D9) */}
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+
       {/* Header */}
-      <header className="header">
+      <header className="header" role="banner">
         <div className="logo-group">
-          <div className="logo-icon">SS</div>
+          <div className="logo-icon" aria-hidden="true">SS</div>
           <div>
             <div className="logo-title">StudySync</div>
           </div>
@@ -153,22 +160,17 @@ export default function App(): React.JSX.Element {
       </header>
 
       {/* Requirement F7, F8, F9, S1: OIDC Authentication & RBAC Bar */}
-      <AuthBar currentUser={currentUser} onLogin={handleLogin} onLogout={handleLogout} />
+      <aside aria-label="User session and authentication">
+        <AuthBar currentUser={currentUser} onLogin={handleLogin} onLogout={handleLogout} />
+      </aside>
 
-      {/* Hero */}
-      <section className="hero">
-        <h1>Peer Code-Review & Assignment Workspace</h1>
-        <p>
-          Structured academic code reviews, rubric-based feedback, and continuous assignment tracking.
-        </p>
-      </section>
-
-      {/* Primary Navigation Switcher */}
-      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem' }}>
+      {/* Primary Navigation Switcher (Requirement D9 Semantic Nav) */}
+      <nav aria-label="Main Application Views" style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem' }}>
         <button
           type="button"
           className={`mcp-tab-btn ${activeMainView === 'catalog' ? 'active' : ''}`}
           style={{ padding: '0.6rem 1.25rem', fontSize: '0.95rem' }}
+          aria-pressed={activeMainView === 'catalog'}
           onClick={() => setActiveMainView('catalog')}
         >
           📚 Workspace Catalog & Real-Time SSE (F1, F2, F11)
@@ -177,6 +179,7 @@ export default function App(): React.JSX.Element {
           type="button"
           className={`mcp-tab-btn ${activeMainView === 'mcp' ? 'active' : ''}`}
           style={{ padding: '0.6rem 1.25rem', fontSize: '0.95rem' }}
+          aria-pressed={activeMainView === 'mcp'}
           onClick={() => setActiveMainView('mcp')}
         >
           🤖 Interactive MCP App & OAuth Tools (F12, F13)
@@ -185,20 +188,39 @@ export default function App(): React.JSX.Element {
           type="button"
           className={`mcp-tab-btn ${activeMainView === 'analysis' ? 'active' : ''}`}
           style={{ padding: '0.6rem 1.25rem', fontSize: '0.95rem' }}
+          aria-pressed={activeMainView === 'analysis'}
           onClick={() => setActiveMainView('analysis')}
         >
           🔍 Third-Party Code Analysis (F10)
         </button>
-      </div>
+      </nav>
 
-      {activeMainView === 'mcp' ? (
-        <McpApp />
-      ) : activeMainView === 'analysis' ? (
-        <CodeAnalysisView />
-      ) : (
-        <>
-          {/* Requirement F11: Live Real-Time Event Stream Panel */}
-      <div className="realtime-panel">
+      {/* Main Content Landmark (Requirement D9) */}
+      <main id="main-content" role="main">
+        {/* Hero */}
+        <section className="hero">
+          <h1>Peer Code-Review & Assignment Workspace</h1>
+          <p>
+            Structured academic code reviews, rubric-based feedback, and continuous assignment tracking.
+          </p>
+        </section>
+        <Suspense
+          fallback={
+            <div className="state-box" aria-busy="true">
+              <div className="spinner" />
+              <h2 className="state-title">Loading Module</h2>
+              <p className="state-desc">Dynamically loading requested feature bundle...</p>
+            </div>
+          }
+        >
+          {activeMainView === 'mcp' ? (
+            <McpApp />
+          ) : activeMainView === 'analysis' ? (
+            <CodeAnalysisView />
+          ) : (
+            <>
+              {/* Requirement F11: Live Real-Time Event Stream Panel */}
+              <div className="realtime-panel" aria-label="Real-time workspace events">
         <div className="realtime-header">
           <div className="realtime-title">
             <span>Live Workspace Activity (SSE Event Bus)</span>
@@ -277,12 +299,13 @@ export default function App(): React.JSX.Element {
       </div>
 
       {/* Requirement F2 Verification Simulator Bar */}
-      <div className="simulator-panel">
+      <div className="simulator-panel" aria-label="UI state simulation controls">
         <div className="simulator-label">Requirement F2 State Simulator (Verification & Testing)</div>
-        <div className="simulator-controls">
+        <div className="simulator-controls" role="group" aria-label="Simulator Mode Controls">
           <button
             type="button"
             className={`sim-btn ${simulationMode === 'live' ? 'active' : ''}`}
+            aria-pressed={simulationMode === 'live'}
             onClick={() => setSimulationMode('live')}
           >
             Live Backend Fetch
@@ -290,6 +313,7 @@ export default function App(): React.JSX.Element {
           <button
             type="button"
             className={`sim-btn ${simulationMode === 'loading' ? 'active' : ''}`}
+            aria-pressed={simulationMode === 'loading'}
             onClick={() => setSimulationMode('loading')}
           >
             Simulate Loading State
@@ -297,6 +321,7 @@ export default function App(): React.JSX.Element {
           <button
             type="button"
             className={`sim-btn ${simulationMode === 'empty' ? 'active' : ''}`}
+            aria-pressed={simulationMode === 'empty'}
             onClick={() => setSimulationMode('empty')}
           >
             Simulate Empty State
@@ -304,6 +329,7 @@ export default function App(): React.JSX.Element {
           <button
             type="button"
             className={`sim-btn ${simulationMode === 'error' ? 'active' : ''}`}
+            aria-pressed={simulationMode === 'error'}
             onClick={() => setSimulationMode('error')}
           >
             Simulate Error State
@@ -312,11 +338,12 @@ export default function App(): React.JSX.Element {
       </div>
 
       {/* Search and Filters (F1 Requirement) */}
-      <div className="search-filter-bar">
+      <div className="search-filter-bar" role="search" aria-label="Assignment Search and Filters">
         <div className="search-input-wrapper">
           <input
             type="search"
             className="search-input"
+            aria-label="Search assignments by title or course"
             placeholder="Search assignments by title or course..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -324,6 +351,7 @@ export default function App(): React.JSX.Element {
         </div>
         <select
           className="filter-select"
+          aria-label="Filter assignments by status"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
@@ -336,7 +364,7 @@ export default function App(): React.JSX.Element {
 
       {/* State Renderings */}
       {loading && (
-        <div className="state-box">
+        <div className="state-box" role="status" aria-live="polite" aria-busy="true">
           <div className="spinner" />
           <h2 className="state-title">Loading Assignments</h2>
           <p className="state-desc">Connecting to StudySync backend and fetching assignment records...</p>
@@ -344,7 +372,7 @@ export default function App(): React.JSX.Element {
       )}
 
       {!loading && error && (
-        <div className="state-box error-box">
+        <div className="state-box error-box" role="alert" aria-live="assertive">
           <h2 className="state-title">Unable to Load Data</h2>
           <p className="state-desc">{error}</p>
           <button
@@ -361,7 +389,7 @@ export default function App(): React.JSX.Element {
       )}
 
       {!loading && !error && assignments.length === 0 && (
-        <div className="state-box">
+        <div className="state-box" role="status" aria-live="polite">
           <h2 className="state-title">No Assignments Found</h2>
           <p className="state-desc">
             No active assignments match your current search criteria or filter selection.
@@ -382,21 +410,23 @@ export default function App(): React.JSX.Element {
       )}
 
       {!loading && !error && assignments.length > 0 && (
-        <div className="assignment-grid">
+        <div className="assignment-grid" aria-label="Active Assignments List">
           {assignments.map((item) => (
-            <div key={item.id} className="assignment-card">
+            <article key={item.id} className="assignment-card" tabIndex={0} aria-label={`${item.title}, Course: ${item.course}, Status: ${item.status}`}>
               <div className="card-course">{item.course}</div>
               <h2 className="card-title">{item.title}</h2>
               <div className="card-meta">
                 <span className={`status-tag status-${item.status}`}>{item.status}</span>
                 <span>Due: {new Date(item.dueDate).toLocaleDateString()}</span>
               </div>
-            </div>
+            </article>
           ))}
         </div>
       )}
         </>
       )}
+        </Suspense>
+      </main>
     </div>
   );
 }

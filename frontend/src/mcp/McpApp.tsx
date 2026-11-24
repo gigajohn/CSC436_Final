@@ -211,8 +211,10 @@ export default function McpApp(): React.JSX.Element {
         {!useAnonymous && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '0.75rem', marginBottom: '0.75rem' }}>
             {personas.map((p) => (
-              <div
+              <button
+                type="button"
                 key={p.role}
+                aria-pressed={selectedPersonaKey === p.role && !customToken}
                 onClick={() => {
                   setSelectedPersonaKey(p.role);
                   setCustomToken('');
@@ -231,7 +233,7 @@ export default function McpApp(): React.JSX.Element {
                     </span>
                   ))}
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         )}
@@ -291,12 +293,18 @@ export default function McpApp(): React.JSX.Element {
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
             <input
               type="text"
+              aria-label="Filter submissions by Assignment ID"
               placeholder="Assignment ID (e.g. asg-001)"
               className="mcp-input"
               value={asgFilter}
               onChange={(e) => setAsgFilter(e.target.value)}
             />
-            <select className="mcp-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+            <select
+              aria-label="Filter submissions by status"
+              className="mcp-select"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
               <option value="all">All Statuses</option>
               <option value="submitted">Submitted</option>
               <option value="under_review">Under Review</option>
@@ -304,6 +312,7 @@ export default function McpApp(): React.JSX.Element {
             </select>
             <input
               type="text"
+              aria-label="Search submissions by student name or commit SHA"
               placeholder="Search student or commit"
               className="mcp-input"
               value={searchFilter}
@@ -336,6 +345,7 @@ export default function McpApp(): React.JSX.Element {
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '1rem' }}>
             <input
               type="text"
+              aria-label="Submission ID to fetch details"
               placeholder="Submission ID"
               className="mcp-input"
               value={detailsSubId}
@@ -362,6 +372,7 @@ export default function McpApp(): React.JSX.Element {
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '1rem' }}>
             <input
               type="text"
+              aria-label="Submission ID to list comments"
               placeholder="Submission ID"
               className="mcp-input"
               value={commentsSubId}
@@ -396,8 +407,9 @@ export default function McpApp(): React.JSX.Element {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
             <div>
-              <label style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '0.25rem' }}>Submission ID</label>
+              <label htmlFor="write-sub-id" style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '0.25rem' }}>Submission ID</label>
               <input
+                id="write-sub-id"
                 type="text"
                 className="mcp-input"
                 style={{ width: '100%' }}
@@ -406,8 +418,9 @@ export default function McpApp(): React.JSX.Element {
               />
             </div>
             <div>
-              <label style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '0.25rem' }}>File Path</label>
+              <label htmlFor="write-file-path" style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '0.25rem' }}>File Path</label>
               <input
+                id="write-file-path"
                 type="text"
                 className="mcp-input"
                 style={{ width: '100%' }}
@@ -416,8 +429,9 @@ export default function McpApp(): React.JSX.Element {
               />
             </div>
             <div>
-              <label style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '0.25rem' }}>Line Number</label>
+              <label htmlFor="write-line-number" style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '0.25rem' }}>Line Number</label>
               <input
+                id="write-line-number"
                 type="number"
                 className="mcp-input"
                 style={{ width: '100%' }}
@@ -426,8 +440,9 @@ export default function McpApp(): React.JSX.Element {
               />
             </div>
             <div>
-              <label style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '0.25rem' }}>Severity</label>
+              <label htmlFor="write-severity" style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '0.25rem' }}>Severity</label>
               <select
+                id="write-severity"
                 className="mcp-select"
                 style={{ width: '100%' }}
                 value={writeSeverity}
@@ -442,8 +457,9 @@ export default function McpApp(): React.JSX.Element {
           </div>
 
           <div style={{ marginBottom: '1rem' }}>
-            <label style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '0.25rem' }}>Rubric Comment Text</label>
+            <label htmlFor="write-comment-text" style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '0.25rem' }}>Rubric Comment Text</label>
             <textarea
+              id="write-comment-text"
               className="mcp-input"
               style={{ width: '100%', minHeight: '60px' }}
               value={writeCommentText}
@@ -490,10 +506,18 @@ export default function McpApp(): React.JSX.Element {
             </button>
           </div>
 
-          {/* Interactive Confirmation Prompt (Step 2) */}
+          {/* Interactive Confirmation Prompt (Step 2, Accessible Dialog) */}
           {pendingConfirmation && (
-            <div className="confirmation-modal">
-              <div style={{ color: 'var(--color-warning)', fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.5rem' }}>
+            <div
+              className="confirmation-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="confirm-dialog-heading"
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') setPendingConfirmation(null);
+              }}
+            >
+              <div id="confirm-dialog-heading" style={{ color: 'var(--color-warning)', fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.5rem' }}>
                 ⚠️ Explicit Mutation Confirmation Required
               </div>
               <p style={{ fontSize: '0.85rem', marginBottom: '0.75rem' }}>
@@ -520,7 +544,7 @@ export default function McpApp(): React.JSX.Element {
                   className="btn-action"
                   onClick={() => setPendingConfirmation(null)}
                 >
-                  Cancel
+                  Cancel (Esc)
                 </button>
               </div>
             </div>

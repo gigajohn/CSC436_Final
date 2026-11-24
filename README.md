@@ -81,6 +81,8 @@ open http://localhost:3000
 | **D4** | CI/CD pipeline & healthz rollback | `.github/workflows/ci.yml` | GitHub Actions / Docker | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
 | **D5** | Reproducible build & clean-clone | `backend/Dockerfile`, `frontend/Dockerfile` | `docker compose up --build` | [`README.md`](README.md#1-quick-start-clean-clone-reproduction) |
 | **D6, D7** | CDN cache policy, CORS & headers | `frontend/nginx.conf`, `backend/src/app.ts` | `npm --workspace=backend run generate:transcript` | [`docs/evidence/f3-rest-curl-transcript.txt`](docs/evidence/f3-rest-curl-transcript.txt) |
+| **D8** | Performance: Code-splitting & Core Web Vitals | `frontend/vite.config.ts`, `frontend/src/App.tsx` | `npm --workspace=frontend run build` | [`docs/evidence/performance-core-web-vitals.md`](docs/evidence/performance-core-web-vitals.md) |
+| **D9** | Accessibility: Zero axe violations & keyboard | `frontend/src/scripts/verify-d9-accessibility.ts` | `npm --workspace=frontend run test:axe` | [`docs/evidence/accessibility-report.md`](docs/evidence/accessibility-report.md) |
 | **D10** | OpenTelemetry Tracing & SLI/SLO | `backend/src/observability/tracer.ts` | `npm --workspace=backend run test:observability` | [`docs/evidence-dossier.md`](docs/evidence-dossier.md#d10-opentelemetry-tracing-slislo--alerting) |
 | **D11** | Cost scaling analysis (1×, 10×, 100×) | `docs/cost-scaling-analysis.md` | Static Analysis | [`docs/cost-scaling-analysis.md`](docs/cost-scaling-analysis.md) |
 | **S1** | Sliding window rate limiting (429) | `backend/src/middleware/rateLimiter.ts` | `npm --workspace=backend run test:auth` | [`docs/evidence-dossier.md`](docs/evidence-dossier.md#f7-f8-f9-s1-oidc-pkce-auth-jwks-validation-rbac--rate-limiting) |
@@ -97,5 +99,7 @@ open http://localhost:3000
 - **[Operations Runbook](docs/runbook.md)** (Startup, migration steps, secret rotation, and incident triage)
 - **[Game Day Postmortem](docs/game-day-postmortem.md)** (Deliberate upstream failure drill, 5 Whys, and failover verification)
 - **[Cost & Scaling Analysis](docs/cost-scaling-analysis.md)** (1×, 10×, and 100× traffic capacity planning and arithmetic)
+- **[Accessibility & axe-core Report](docs/evidence/accessibility-report.md)** (Zero critical/serious violations, full keyboard walkthrough)
+- **[Core Web Vitals & Performance Report](docs/evidence/performance-core-web-vitals.md)** (Code-splitting, 89.1% bundle reduction, LCP/TBT improvements)
 - **[Course Evidence Dossier](docs/evidence-dossier.md)** (Comprehensive audit trail of commit SHAs, reproduction commands, raw logs, deliberate failures, and AI provenance)
 - **[REST API curl -i Transcript](docs/evidence/f3-rest-curl-transcript.txt)** (Raw HTTP request/response transcripts across all methods, status codes, and error envelopes)

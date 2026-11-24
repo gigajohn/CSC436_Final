@@ -819,3 +819,46 @@ button, input, select {
   background: rgba(56, 189, 248, 0.2);
   color: var(--color-primary);
 }
+
+/* ==============================================================================
+   Accessibility & Keyboard Navigation (Requirement D9)
+   ============================================================================== */
+
+/* High-contrast accessible focus ring for all interactive elements */
+:focus-visible {
+  outline: 2px solid var(--color-primary) !important;
+  outline-offset: 2px !important;
+}
+
+/* Skip-to-content link for keyboard screen-reader users */
+.skip-link {
+  position: absolute;
+  top: -80px;
+  left: 1rem;
+  background: var(--color-primary);
+  color: #0f172a;
+  padding: 0.65rem 1.25rem;
+  font-weight: 700;
+  border-radius: 4px;
+  z-index: 9999;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  transition: top 0.15s ease-in-out;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* Accessible button styling for persona cards */
+button.persona-card {
+  text-align: left;
+  font-family: inherit;
+  width: 100%;
+  cursor: pointer;
+}
+
+/* Accessible modal dialog */
+.confirmation-modal[role="dialog"] {
+  border: 2px solid var(--color-warning);
+}
