@@ -4,7 +4,11 @@
 |---|---|
 | **Project Name** | StudySync — Peer Code-Review & Assignment Workspace |
 | **Course** | CSC436 Distributed Systems & Web Applications |
-| **Commit SHA** | `32946795170a89c808bbd1b754b59e8f62e9154c` |
+| **Commit SHA** | `0d8b6960e2d8efeeb678c39e36282f28275496fb` |
+| **Production URL** | [https://studysync.lathropprojects.net](https://studysync.lathropprojects.net) |
+| **Staging URL** | [https://staging.studysync.lathropprojects.net](https://staging.studysync.lathropprojects.net) |
+| **Host & Ingress** | Contabo AlmaLinux VPS (`154.38.174.24`) with Caddy & Let's Encrypt TLS 1.3 |
+| **Authoritative DNS** | Contabo DNS (`ns1.contabo.net` – `ns3.contabo.net`), TTL: 3600s |
 | **Evidence Standard** | All claims backed by commit SHA, commands, raw outputs, deliberate failures, and interpretation |
 | **AI Provenance** | Included in Section 5 with challenged AI claims and provenance logs |
 | **Redaction Attestation** | Included in Section 6 (Hard Gate 1, 2, and 5 compliance) |
