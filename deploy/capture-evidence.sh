@@ -24,6 +24,8 @@ echo "--------------------------------------------------------------------------
 echo "### SECTION 2: Requirement D2 — CAA Record Enforcement" >> "$OUT_FILE"
 echo "$ dig CAA lathropprojects.net" >> "$OUT_FILE"
 dig CAA lathropprojects.net >> "$OUT_FILE" 2>&1 || true
+echo "$ dig @ns1.contabo.net CAA lathropprojects.net" >> "$OUT_FILE"
+dig @ns1.contabo.net CAA lathropprojects.net >> "$OUT_FILE" 2>&1 || true
 echo -e "\n" >> "$OUT_FILE"
 
 echo "--------------------------------------------------------------------------------" >> "$OUT_FILE"
