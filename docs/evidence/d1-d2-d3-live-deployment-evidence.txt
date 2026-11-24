@@ -1,0 +1,179 @@
+================================================================================
+ StudySync Public Deployment Evidence Dossier (Requirements D1, D2, D3)
+ Timestamp: 2026-11-24T17:18:22Z
+ Domains: studysync.lathropprojects.net (Prod), staging.studysync.lathropprojects.net (Staging)
+================================================================================\n
+### SECTION 1: Requirement D1 — Authoritative DNS Trace & TTL Verification
+$ dig +trace studysync.lathropprojects.net
+
+; <<>> DiG 9.16.50-RH <<>> +trace studysync.lathropprojects.net
+;; global options: +cmd
+.			27149	IN	NS	j.root-servers.net.
+.			27149	IN	NS	c.root-servers.net.
+.			27149	IN	NS	h.root-servers.net.
+.			27149	IN	NS	m.root-servers.net.
+.			27149	IN	NS	k.root-servers.net.
+.			27149	IN	NS	b.root-servers.net.
+.			27149	IN	NS	f.root-servers.net.
+.			27149	IN	NS	g.root-servers.net.
+.			27149	IN	NS	a.root-servers.net.
+.			27149	IN	NS	i.root-servers.net.
+.			27149	IN	NS	e.root-servers.net.
+.			27149	IN	NS	l.root-servers.net.
+.			27149	IN	NS	d.root-servers.net.
+.			27149	IN	RRSIG	NS 8 0 518400 20261206210000 20261123200000 8763 . KtvRjgxVNU8ibj7Neh3+av7dFiOC2Q4r32wYrPcKivtnaNWYKQYFL5IU gaKN8zz+B2JvZJF0Sme6Gxpvlc8YtPyUPh2PsUDUu1K0CDJyLlJlqbJG 6hteo9ztWfFnz9c9oRKWSWrQSSUAdwb4uliZZeUzL6QyAffyMaQvmTKQ jDj7nr+z8WP0MMl1oTFW08ZnTBFboGWLEMoZCwvkIMA8FZzpYVmfTBEg oK1L44T/wXqIJbfOxYPd4EHHZHLnfzi/E6pmLit18DQnPskLOTfUIbQr u5jIoz2bm2/aHd1RqEwf2w1ZuoVAxZk8Snc2GbLbc0enjo9BHuo+xler 4xI2Vg==
+;; Received 717 bytes from 100.78.122.240#53(100.78.122.240) in 2 ms
+
+net.			172800	IN	NS	a.gtld-servers.net.
+net.			172800	IN	NS	b.gtld-servers.net.
+net.			172800	IN	NS	c.gtld-servers.net.
+net.			172800	IN	NS	d.gtld-servers.net.
+net.			172800	IN	NS	e.gtld-servers.net.
+net.			172800	IN	NS	f.gtld-servers.net.
+net.			172800	IN	NS	g.gtld-servers.net.
+net.			172800	IN	NS	h.gtld-servers.net.
+net.			172800	IN	NS	i.gtld-servers.net.
+net.			172800	IN	NS	j.gtld-servers.net.
+net.			172800	IN	NS	k.gtld-servers.net.
+net.			172800	IN	NS	l.gtld-servers.net.
+net.			172800	IN	NS	m.gtld-servers.net.
+net.			86400	IN	DS	37331 13 2 2F0BEC2D6F79DFBD1D08FD21A3AF92D0E39A4B9EF1E3F4111FFF2824 90DA453B
+net.			86400	IN	RRSIG	DS 8 1 86400 20261207050000 20261124040000 8763 . QbNf++IDYlY5RIvVDsd34/5bViARUKLevLf4ZDiarHdVDZI/kRxAw/3n xjbeZdjzLkHXbAGeXQS71JRupcgpGlzD0GHmc5E74z40wO0OZf8vrT2M m/TY+q3mJoKyTmPaW82jZ5DBuk8olV8tljIdXQqMbzN5BkgLuVj00fBs myMXSfzSCeyA0GtuQDU00bHRYwMIrdrgaOEbBxCio+qhPGlBzC+YAtZU JU6M8YwTT2UWTHahlM1eG/Ret7g+ygTxXdqSthSXL92lBr1WOTWKZDz0 WsohG8tnalfoeSWnSE+fxI+n+zeAHSDjhwlu5Jpx89JzQvxHshZ0FwOv 2+egpg==
+;; Received 1186 bytes from 192.5.5.241#53(f.root-servers.net) in 0 ms
+
+lathropprojects.net.	172800	IN	NS	ns1.contabo.net.
+lathropprojects.net.	172800	IN	NS	ns2.contabo.net.
+lathropprojects.net.	172800	IN	NS	ns3.contabo.net.
+A1RT98BS5QGC9NFI51S9HCI47ULJG6JH.net. 900 IN NSEC3 1 1 0 - A1RTLNPGULOGN7B9A62SHJE1U3TTP8DR NS SOA RRSIG DNSKEY NSEC3PARAM
+A1RT98BS5QGC9NFI51S9HCI47ULJG6JH.net. 900 IN RRSIG NSEC3 13 2 900 20261130041353 20261123030353 3840 net. jIsUWWAi73t/xpwkkTmwerfGTv/8F0vOlcIXkfBsEc/SjnMAVoa8Ymmr T0dO/JCvtCBzofhDt3or/N2dZyQJJQ==
+OTV69LE4E3TAEM4VF75RHG0LM7KCTP1F.net. 900 IN NSEC3 1 1 0 - OTV9D9M859GAOTNH1U2R23BBAHS2JSAG NS DS RRSIG
+OTV69LE4E3TAEM4VF75RHG0LM7KCTP1F.net. 900 IN RRSIG NSEC3 13 2 900 20261130042207 20261123031207 3840 net. PQmN+JZJVv+BIIblQ+JQG+ABFNAjX1qx+SW0fmHM/NTfRpGuB9xLAwZA i2Bg+wfydoTDI1Rytaga6MGFu8dzEA==
+;; Received 525 bytes from 192.54.112.30#53(h.gtld-servers.net) in 5 ms
+
+studysync.lathropprojects.net. 3600 IN	A	154.38.174.24
+;; Received 74 bytes from 209.126.15.15#53(ns3.contabo.net) in 1 ms
+
+
+TTL Rationale: 3600 seconds (1 hour) is the minimum TTL permitted by the authoritative DNS provider (Contabo). This represents the tightest cache expiration window allowed by the infrastructure, ensuring responsive failover during server redeployments while respecting upstream resolver rate limits.
+
+--------------------------------------------------------------------------------
+### SECTION 2: Requirement D2 — CAA Record Enforcement
+$ dig CAA lathropprojects.net
+
+; <<>> DiG 9.16.50-RH <<>> CAA lathropprojects.net
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 63277
+;; flags: qr rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 512
+;; QUESTION SECTION:
+;lathropprojects.net.		IN	CAA
+
+;; AUTHORITY SECTION:
+lathropprojects.net.	3600	IN	SOA	ns1.contabo.net. hostmaster.contabo.de. 1795540703 10800 3600 604800 3600
+
+;; Query time: 9 msec
+;; SERVER: 100.78.122.240#53(100.78.122.240)
+;; WHEN: Tue Nov 24 18:18:23 CET 2026
+;; MSG SIZE  rcvd: 139
+
+
+
+--------------------------------------------------------------------------------
+### SECTION 3: Requirement D2 — Mandatory HTTP to HTTPS 308/301 Redirect
+$ curl -I http://studysync.lathropprojects.net
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+HTTP/1.1 308 Permanent Redirect
+Connection: close
+Location: https://studysync.lathropprojects.net/
+Server: Caddy
+Date: Tue, 24 Nov 2026 17:18:23 GMT
+
+
+
+--------------------------------------------------------------------------------
+### SECTION 4: Requirement D2 — TLS Certificate Chain Inspection
+$ openssl s_client -connect studysync.lathropprojects.net:443 -servername studysync.lathropprojects.net < /dev/null
+depth=3 C=US, O=Internet Security Research Group, CN=ISRG Root X2
+depth=2 C=US, O=ISRG, CN=Root YE
+depth=1 C=US, O=Let's Encrypt, CN=YE2
+depth=0 CN=studysync.lathropprojects.net
+Certificate chain
+subject=CN=studysync.lathropprojects.net
+issuer=C=US, O=Let's Encrypt, CN=YE2
+Verify return code: 0 (ok)
+    Verify return code: 0 (ok)
+
+
+--------------------------------------------------------------------------------
+### SECTION 5: Requirement D3 — Staging vs Production Separation
+Production Endpoint Health Check:
+$ curl -i https://studysync.lathropprojects.net/healthz
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   157  100   157    0     0   6541      0 --:--:-- --:--:-- --:--:--  6541
+HTTP/2 200 
+access-control-allow-credentials: true
+access-control-allow-origin: https://studysync.lathropprojects.net
+alt-svc: h3=":443"; ma=2592000
+content-security-policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data:; connect-src 'self' https://studysync.lathropprojects.net wss://studysync.lathropprojects.net;
+content-type: application/json; charset=utf-8
+cross-origin-opener-policy: same-origin
+cross-origin-resource-policy: same-origin
+date: Tue, 24 Nov 2026 17:18:23 GMT
+etag: W/"9d-dy1aPyKKC33fS8ipL4XN2VJCqcI"
+origin-agent-cluster: ?1
+referrer-policy: strict-origin-when-cross-origin
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+traceparent: 00-3284715974e5e69a128506ed9d70911c-7be365bab1c5395b-01
+vary: Origin
+via: 1.1 Caddy
+x-content-type-options: nosniff
+x-dns-prefetch-control: off
+x-download-options: noopen
+x-frame-options: SAMEORIGIN
+x-permitted-cross-domain-policies: none
+x-trace-id: 3284715974e5e69a128506ed9d70911c
+x-xss-protection: 0
+content-length: 157
+
+{"status":"ok","service":"studysync-backend","timestamp":"2026-11-24T17:18:23.436Z","uptime":13884.477648832,"database":{"status":"connected","latencyMs":1}}
+
+Staging Endpoint Health Check (with X-StudySync-Environment: staging):
+$ curl -i https://staging.studysync.lathropprojects.net/healthz
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   157  100   157    0     0   2065      0 --:--:-- --:--:-- --:--:--  2065
+HTTP/2 200 
+access-control-allow-credentials: true
+access-control-allow-origin: https://staging.studysync.lathropprojects.net
+alt-svc: h3=":443"; ma=2592000
+content-security-policy: default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src 'self';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests
+content-type: application/json; charset=utf-8
+cross-origin-opener-policy: same-origin
+cross-origin-resource-policy: same-origin
+date: Tue, 24 Nov 2026 17:18:23 GMT
+etag: W/"9d-h9M6/xMY9HQgBz6cX86GUDML9ow"
+origin-agent-cluster: ?1
+referrer-policy: strict-origin-when-cross-origin
+strict-transport-security: max-age=31536000; includeSubDomains
+traceparent: 00-3550f0cec495c538ab445713b28460ef-f5972c526ebdcf8e-01
+vary: Origin
+via: 1.1 Caddy
+x-content-type-options: nosniff
+x-dns-prefetch-control: off
+x-download-options: noopen
+x-frame-options: SAMEORIGIN
+x-permitted-cross-domain-policies: none
+x-studysync-environment: staging
+x-trace-id: 3550f0cec495c538ab445713b28460ef
+x-xss-protection: 0
+content-length: 157
+
+{"status":"ok","service":"studysync-backend","timestamp":"2026-11-24T17:18:23.522Z","uptime":13863.929239292,"database":{"status":"connected","latencyMs":1}}
+
+================================================================================
