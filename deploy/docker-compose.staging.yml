@@ -10,6 +10,10 @@ services:
       dockerfile: backend/Dockerfile
     container_name: studysync-staging-backend
     restart: unless-stopped
+    networks:
+      default:
+        aliases:
+          - backend
     environment:
       PORT: 4000
       NODE_ENV: staging

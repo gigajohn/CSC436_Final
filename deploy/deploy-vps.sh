@@ -14,7 +14,7 @@ echo "                 staging.studysync.lathropprojects.net (Staging)  "
 echo "=================================================================="
 
 # 1. Update and install prerequisites
-echo "\n[1/6] Installing system prerequisites and Caddy on AlmaLinux..."
+echo "\n[1/7] Installing system prerequisites and Caddy on AlmaLinux..."
 dnf install -y epel-release 'dnf-command(copr)' curl git bind-utils
 
 # Enable Caddy COPR repository and install Caddy
@@ -26,16 +26,16 @@ fi
 
 # 2. Install Docker if not present
 if ! command -v docker &> /dev/null; then
-  echo "\n[2/6] Installing Docker engine..."
+  echo "\n[2/7] Installing Docker engine..."
   dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
   dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
   systemctl enable --now docker
 else
-  echo "\n[2/6] Docker already installed: $(docker --version)"
+  echo "\n[2/7] Docker already installed: $(docker --version)"
 fi
 
 # 3. Configure firewalld
-echo "\n[3/6] Opening HTTP (80) and HTTPS (443) ports in firewalld..."
+echo "\n[3/7] Opening HTTP (80) and HTTPS (443) ports in firewalld..."
 if systemctl is-active --quiet firewalld; then
   firewall-cmd --permanent --add-service=http || true
   firewall-cmd --permanent --add-service=https || true
@@ -45,16 +45,23 @@ else
   echo "firewalld is not active; skipping."
 fi
 
-# 4. Deploy Production stack (:3001, :4001)
-echo "\n[4/6] Building and launching Production environment containers..."
+# 4. Configure SELinux for Caddy reverse proxy network connections
+echo "\n[4/7] Configuring SELinux permissions for Caddy reverse proxy..."
+if command -v setsebool &> /dev/null; then
+  setsebool -P httpd_can_network_connect 1 || true
+  echo "✓ SELinux httpd_can_network_connect enabled."
+fi
+
+# 5. Deploy Production stack (:3001, :4001)
+echo "\n[5/7] Building and launching Production environment containers..."
 docker compose -f deploy/docker-compose.prod.yml up --build -d
 
-# 5. Deploy Staging stack (:3002, :4002)
-echo "\n[5/6] Building and launching Staging environment containers..."
+# 6. Deploy Staging stack (:3002, :4002)
+echo "\n[6/7] Building and launching Staging environment containers..."
 docker compose -f deploy/docker-compose.staging.yml up --build -d
 
-# 6. Configure and restart Caddy
-echo "\n[6/6] Applying Caddy reverse proxy configuration..."
+# 7. Configure and restart Caddy
+echo "\n[7/7] Applying Caddy reverse proxy configuration..."
 cp deploy/Caddyfile /etc/caddy/Caddyfile
 systemctl enable --now caddy
 systemctl restart caddy
