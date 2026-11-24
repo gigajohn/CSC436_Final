@@ -3,6 +3,8 @@
 # Isolated production containers, volumes, and ports.
 # ==============================================================================
 
+name: studysync-prod
+
 services:
   backend-prod:
     build:

@@ -3,6 +3,8 @@
 # Completely separate data volumes, ports, and configuration.
 # ==============================================================================
 
+name: studysync-staging
+
 services:
   backend-staging:
     build:

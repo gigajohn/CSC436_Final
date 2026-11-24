@@ -54,11 +54,11 @@ fi
 
 # 5. Deploy Production stack (:3001, :4001)
 echo "\n[5/7] Building and launching Production environment containers..."
-docker compose -f deploy/docker-compose.prod.yml up --build -d
+docker compose -p studysync-prod -f deploy/docker-compose.prod.yml up --build -d
 
 # 6. Deploy Staging stack (:3002, :4002)
 echo "\n[6/7] Building and launching Staging environment containers..."
-docker compose -f deploy/docker-compose.staging.yml up --build -d
+docker compose -p studysync-staging -f deploy/docker-compose.staging.yml up --build -d
 
 # 7. Configure and restart Caddy
 echo "\n[7/7] Applying Caddy reverse proxy configuration..."
