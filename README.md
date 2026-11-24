@@ -2,6 +2,12 @@
 
 StudySync is a full-stack, distributed web application for collaborative academic peer code reviews and assignment submissions, built for **CSC436 Distributed Systems & Web Applications**.
 
+### 🌐 Live Public Deployment
+- **Production URL**: [https://studysync.lathropprojects.net](https://studysync.lathropprojects.net)
+- **Staging URL**: [https://staging.studysync.lathropprojects.net](https://staging.studysync.lathropprojects.net)
+- **Host**: Contabo AlmaLinux VPS (`154.38.174.24`) with Caddy reverse-proxy & automated Let's Encrypt TLS 1.3
+- **Authoritative DNS**: Contabo DNS (`ns1.contabo.net` – `ns3.contabo.net`), TTL: 3600s (minimum provider TTL)
+
 ---
 
 ## 1. Quick Start (Clean-Clone Reproduction)
@@ -14,7 +20,7 @@ StudySync is a full-stack, distributed web application for collaborative academi
 ### One-Command Setup & Verification
 ```bash
 # 1. Clone the repository
-git clone https://github.com/synthetic/CSC436_Final.git
+git clone https://github.com/gigajohn/CSC436_Final.git
 cd CSC436_Final
 
 # 2. Install workspace dependencies
@@ -78,6 +84,9 @@ open http://localhost:3000
 | **F10** | Third-party resilient API client | `backend/src/integrations/codeAnalysisClient.ts` | `npm --workspace=backend run test:thirdparty` | [`docs/evidence-dossier.md`](docs/evidence-dossier.md#f10-third-party-api-integration--resilience) |
 | **F11** | Live updates via SSE & replay buffer | `backend/src/realtime/sseHandler.ts` | `npm --workspace=backend run test:sse` | [`docs/evidence-dossier.md`](docs/evidence-dossier.md#f11-real-time-sse-stream-with-reconnection-buffer) |
 | **F12, F13**| MCP Server & Interactive MCP App | `backend/src/mcp/mcpTools.ts` | `npm --workspace=backend run test:mcp` | [`docs/evidence-dossier.md`](docs/evidence-dossier.md#f12--f13-oauth-protected-mcp-server--interactive-mcp-app) |
+| **D1** | Custom domain & 3600s DNS TTL | Contabo DNS, `deploy/Caddyfile` | `dig +trace studysync.lathropprojects.net` | [`docs/evidence-dossier.md`](docs/evidence-dossier.md#d1-custom-domain-authoritative-dns--justified-ttl) |
+| **D2** | TLS 1.3, CAA record & HTTP 308 redirect | `deploy/Caddyfile`, Contabo DNS | `curl -I http://studysync.lathropprojects.net` | [`docs/evidence-dossier.md`](docs/evidence-dossier.md#d2-tls-13-termination-caa-record-enforcement--mandatory-https-redirect) |
+| **D3** | Staging vs. Prod separation & canary flag | `deploy/docker-compose.prod.yml`, `staging.yml` | `curl -i https://staging.studysync.lathropprojects.net/healthz` | [`docs/evidence-dossier.md`](docs/evidence-dossier.md#d3-staging-vs-production-environment-separation) |
 | **D4** | CI/CD pipeline & healthz rollback | `.github/workflows/ci.yml` | GitHub Actions / Docker | [`.github/workflows/ci.yml`](.github/workflows/ci.yml) |
 | **D5** | Reproducible build & clean-clone | `backend/Dockerfile`, `frontend/Dockerfile` | `docker compose up --build` | [`README.md`](README.md#1-quick-start-clean-clone-reproduction) |
 | **D6, D7** | CDN cache policy, CORS & headers | `frontend/nginx.conf`, `backend/src/app.ts` | `npm --workspace=backend run generate:transcript` | [`docs/evidence/f3-rest-curl-transcript.txt`](docs/evidence/f3-rest-curl-transcript.txt) |
