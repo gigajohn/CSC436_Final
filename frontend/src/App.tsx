@@ -155,7 +155,38 @@ export default function App(): React.JSX.Element {
           <span style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>
             Backend API: <strong style={{ color: healthStatus === 'ok' ? 'var(--color-success)' : 'var(--color-danger)' }}>{healthStatus}</strong>
           </span>
-          <span className="badge-public">Public Workspace</span>
+          {typeof window !== 'undefined' && window.location.hostname.includes('staging') ? (
+            <span
+              className="badge-staging"
+              style={{
+                backgroundColor: '#f59e0b',
+                color: '#111827',
+                padding: '0.25rem 0.65rem',
+                borderRadius: '9999px',
+                fontWeight: 700,
+                fontSize: '0.75rem',
+                letterSpacing: '0.05em',
+                boxShadow: '0 0 10px rgba(245, 158, 11, 0.4)',
+              }}
+            >
+              🧪 STAGING CANARY
+            </span>
+          ) : (
+            <span
+              className="badge-prod"
+              style={{
+                backgroundColor: '#10b981',
+                color: '#ffffff',
+                padding: '0.25rem 0.65rem',
+                borderRadius: '9999px',
+                fontWeight: 700,
+                fontSize: '0.75rem',
+                letterSpacing: '0.05em',
+              }}
+            >
+              🟢 PRODUCTION
+            </span>
+          )}
         </div>
       </header>
 
