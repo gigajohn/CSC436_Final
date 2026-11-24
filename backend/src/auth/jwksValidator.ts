@@ -1,3 +1,11 @@
+import nodeCrypto from 'node:crypto';
+
+// Polyfill WebCrypto for Node runtime environments where globalThis.crypto is not exposed globally
+if (typeof globalThis.crypto === 'undefined' && (nodeCrypto as any).webcrypto) {
+  // @ts-ignore
+  globalThis.crypto = (nodeCrypto as any).webcrypto;
+}
+
 import {
   jwtVerify,
   SignJWT,

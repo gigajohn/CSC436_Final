@@ -3,6 +3,14 @@
  * Executes the 5 deliberate failure demonstrations and Q1 arithmetic verification in sequence.
  */
 
+import nodeCrypto from 'node:crypto';
+
+// Polyfill WebCrypto for Node runtime environments where globalThis.crypto is not exposed globally
+if (typeof globalThis.crypto === 'undefined' && (nodeCrypto as any).webcrypto) {
+  // @ts-ignore
+  globalThis.crypto = (nodeCrypto as any).webcrypto;
+}
+
 import { mintToken, verifyTokenWithJwks, JwksValidationError } from '../auth/jwksValidator.js';
 import { getDb, resetDatabaseConnection } from '../db/connection.js';
 import { migrator } from '../db/migrator.js';
