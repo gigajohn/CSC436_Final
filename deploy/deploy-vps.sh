@@ -53,11 +53,11 @@ docker compose -f deploy/docker-compose.prod.yml up --build -d
 echo "\n[5/6] Building and launching Staging environment containers..."
 docker compose -f deploy/docker-compose.staging.yml up --build -d
 
-# 6. Configure and reload Caddy
+# 6. Configure and restart Caddy
 echo "\n[6/6] Applying Caddy reverse proxy configuration..."
 cp deploy/Caddyfile /etc/caddy/Caddyfile
 systemctl enable --now caddy
-systemctl reload caddy
+systemctl restart caddy
 
 echo "\n=================================================================="
 echo " StudySync Deployment Complete!                                   "

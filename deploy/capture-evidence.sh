@@ -18,7 +18,7 @@ echo "==========================================================================
 echo "### SECTION 1: Requirement D1 — Authoritative DNS Trace & TTL Verification" >> "$OUT_FILE"
 echo "$ dig +trace studysync.lathropprojects.net" >> "$OUT_FILE"
 dig +trace studysync.lathropprojects.net >> "$OUT_FILE" 2>&1 || true
-echo -e "\nTTL Rationale: 300 seconds (5 min) selected to facilitate rapid IP failover without excessive DNS resolver load.\n" >> "$OUT_FILE"
+echo -e "\nTTL Rationale: 3600 seconds (1 hour) is the minimum TTL permitted by the authoritative DNS provider (Contabo). This represents the tightest cache expiration window allowed by the infrastructure, ensuring responsive failover during server redeployments while respecting upstream resolver rate limits.\n" >> "$OUT_FILE"
 
 echo "--------------------------------------------------------------------------------" >> "$OUT_FILE"
 echo "### SECTION 2: Requirement D2 — CAA Record Enforcement" >> "$OUT_FILE"

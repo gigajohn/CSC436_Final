@@ -169,7 +169,43 @@
 
 ---
 
-## 3. Deployment & Delivery Requirements (D4, D5, D6, D7, D10, D11)
+## 3. Deployment & Delivery Requirements (D1-D11)
+
+### D1: Custom Domain, Authoritative DNS & Justified TTL
+- **Target Domains**:
+  - Production: `https://studysync.lathropprojects.net`
+  - Staging: `https://staging.studysync.lathropprojects.net`
+- **Authoritative Nameservers**: Contabo DNS (`ns1.contabo.net`, `ns2.contabo.net`, `ns3.contabo.net`).
+- **Host Target IP**: `154.38.174.24` (Contabo AlmaLinux VPS).
+- **TTL Rationale**: **3600 seconds (1 hour)** is the minimum allowable TTL enforced by Contabo's authoritative DNS management platform. This represents the tightest cache expiration window allowed by the infrastructure, ensuring responsive failover during server redeployments while preventing upstream resolver rate limits.
+- **Verification Command**:
+  ```bash
+  dig +trace studysync.lathropprojects.net
+  ```
+
+### D2: TLS 1.3 Termination, CAA Record Enforcement & Mandatory HTTPS Redirect
+- **Ingress Controller**: Caddy on AlmaLinux terminates TLS 1.3 with automatic Let's Encrypt certificate issuance and renewal.
+- **CAA Record**: Published on root apex `lathropprojects.net` specifying `0 issue "letsencrypt.org"`, cryptographically restricting certificate issuance to Let's Encrypt.
+- **Mandatory HTTPS Redirect**: All plaintext HTTP (port 80) traffic receives an immediate HTTP 308 redirect to HTTPS (port 443).
+- **TLS Ciphers & Protocol**: TLS 1.3 / TLS 1.2 with HSTS preloaded (`max-age=31536000; includeSubDomains; preload`).
+- **Verification Command**:
+  ```bash
+  curl -I http://studysync.lathropprojects.net
+  dig CAA lathropprojects.net
+  openssl s_client -connect studysync.lathropprojects.net:443 -servername studysync.lathropprojects.net < /dev/null
+  ```
+
+### D3: Staging vs. Production Environment Separation
+- **Isolation Architecture**:
+  - **Production Stack** (`deploy/docker-compose.prod.yml`): Runs on internal ports `:3001` (frontend) and `:4001` (backend), backed by isolated Docker volume `prod-appdata`.
+  - **Staging Stack** (`deploy/docker-compose.staging.yml`): Runs on internal ports `:3002` (frontend) and `:4002` (backend), backed by isolated Docker volume `staging-appdata`.
+  - **Canary & Environment Headers**: Caddy injects `X-StudySync-Environment: staging` on all staging traffic; backend runs with `CANARY_FEATURE_FLAG: "true"`.
+  - **Data Isolation**: Mutations, database migrations, and student submissions executed in Staging do not touch Production storage.
+- **Verification Script**:
+  ```bash
+  ./deploy/capture-evidence.sh
+  ```
+  Generates raw output in `docs/evidence/d1-d2-d3-live-deployment-evidence.txt`.
 
 ### D4 & D5: CI/CD Pipeline, Healthz Gated Rollback & Clean Clone
 - **Artifacts**: `.github/workflows/ci.yml`, `backend/Dockerfile`, `frontend/Dockerfile`, `docker-compose.yml`, `README.md`.
